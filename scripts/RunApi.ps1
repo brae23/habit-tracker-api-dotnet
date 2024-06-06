@@ -1,0 +1,1 @@
+dotnet run --project .\src\Api\HabitTracker.Api.csproj --launch-profile https
