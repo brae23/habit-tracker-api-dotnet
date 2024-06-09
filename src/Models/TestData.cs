@@ -1,4 +1,4 @@
-namespace HabitTrackerApi.Models;
+namespace HabitTracker.Api.Models;
 
 public class TestData
 {

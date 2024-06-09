@@ -1,6 +1,5 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using HabitTrackerApi.Models;
+using HabitTracker.Api.Models;
 
 namespace HabitTrackerApi.Controllers;
 
