@@ -31,6 +31,6 @@ app.MapControllers();
 
 app.UseCors();
 
-app.UseSession();
+// app.UseSession();
 
 app.Run();
