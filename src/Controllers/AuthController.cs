@@ -1,9 +1,4 @@
-using System.Net;
-using HabitTracker.Api.Models;
-using HabitTracker.Api.Requests;
 using HabitTracker.Api.Requests.Auth;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HabitTracker.Api.Controllers;
