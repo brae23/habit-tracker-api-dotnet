@@ -3,6 +3,7 @@ using System;
 using HabitTracker.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HabitTracker.Api.Migrations
 {
     [DbContext(typeof(HabitTrackerDbContext))]
-    partial class HabitTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240611160003_UserEmail")]
+    partial class UserEmail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.6");

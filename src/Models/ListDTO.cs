@@ -1,6 +1,6 @@
 namespace HabitTracker.Api.Models;
 
-public class List
+public class ListDTO
 {
     public Guid ListId { get; set; }
     public required string Name { get; set;}
