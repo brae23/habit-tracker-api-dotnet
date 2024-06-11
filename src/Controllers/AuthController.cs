@@ -6,9 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace HabitTracker.Api.Controllers;
 
 [Route("api/auth")]
-public class AuthController :  ControllerBase
+public class AuthController : ControllerBase
 {
     private const string SessionKey = "_UserId";
+    private const string SessionCookieName = ".AspNetCore.Session";
     private readonly IUserService _userService;
 
     public AuthController(IUserService userService)
@@ -18,7 +19,7 @@ public class AuthController :  ControllerBase
 
     [HttpPost]
     [Route("login")]
-    public async Task<IActionResult> Login(LoginRequest request)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var result = await _userService.LoginUserAsync(request);
 
@@ -49,6 +50,7 @@ public class AuthController :  ControllerBase
         try
         {
             HttpContext.Session.Clear();
+            Response.Cookies.Delete(SessionCookieName);
             return new OkResult();
         }
         catch (Exception ex)
@@ -61,7 +63,7 @@ public class AuthController :  ControllerBase
 
     [HttpPost]
     [Route("createUser")]
-    public async Task<IActionResult> CreateUserAsync(CreateUserRequest request)
+    public async Task<IActionResult> CreateUserAsync([FromBody] CreateUserRequest request)
     {
         var result = await _userService.CreateUserAsync(request);
 
