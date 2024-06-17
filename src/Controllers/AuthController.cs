@@ -21,8 +21,15 @@ public class AuthController : ControllerBase
 
     [HttpPost]
     [Route("login")]
-    public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
+    public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request, [FromServices] IValidator<LoginRequest> validator)
     {
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult);
+        }
+
         var result = await _userService.LoginUserAsync(request);
 
         switch(result.StatusCode)
@@ -35,11 +42,11 @@ public class AuthController : ControllerBase
                 }
                 return StatusCode(StatusCodes.Status500InternalServerError);
             case HttpStatusCode.NotFound:
-                return new NotFoundResult();
+                return StatusCode(StatusCodes.Status404NotFound, $"User with username <{request.Username}> not found.");
             case HttpStatusCode.BadRequest:
-                return new BadRequestResult();
+                return StatusCode(StatusCodes.Status400BadRequest, "Passwod does not match.");
             case HttpStatusCode.SeeOther:
-                return StatusCode(StatusCodes.Status303SeeOther);
+                return StatusCode(StatusCodes.Status303SeeOther, "Password matches, but must be reset.");
             default:
                 return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -57,8 +64,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            logger.LogError("Encountered exception while clearing user session.");
-            logger.LogError($"{ex}");
+            logger.LogError($"Encountered exception while clearing user session. Exception: {ex}");
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
@@ -71,9 +77,7 @@ public class AuthController : ControllerBase
 
         if (!validationResult.IsValid)
         {
-            var errorMessages = validationResult.Errors.Select(x => x.ErrorMessage);
-            var errorMessageString = string.Join(Environment.NewLine, errorMessages);
-            return StatusCode(StatusCodes.Status400BadRequest, errorMessageString);
+            return BadRequest(validationResult);
         }
 
         var result = await _userService.CreateUserAsync(request);
