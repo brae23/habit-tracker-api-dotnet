@@ -1,6 +1,8 @@
 using System.Net;
+using FluentValidation;
 using HabitTracker.Api.Requests.Auth;
 using HabitTracker.Api.Services.Auth;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HabitTracker.Api.Controllers;
@@ -19,7 +21,7 @@ public class AuthController : ControllerBase
 
     [HttpPost]
     [Route("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
     {
         var result = await _userService.LoginUserAsync(request);
 
@@ -63,18 +65,25 @@ public class AuthController : ControllerBase
 
     [HttpPost]
     [Route("createUser")]
-    public async Task<IActionResult> CreateUserAsync([FromBody] CreateUserRequest request)
+    public async Task<IActionResult> CreateUserAsync([FromBody] CreateUserRequest request, [FromServices] IValidator<CreateUserRequest> validator)
     {
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            var errorMessages = validationResult.Errors.Select(x => x.ErrorMessage);
+            var errorMessageString = string.Join(Environment.NewLine, errorMessages);
+            return StatusCode(StatusCodes.Status400BadRequest, errorMessageString);
+        }
+
         var result = await _userService.CreateUserAsync(request);
 
         switch (result.StatusCode)
         {
             case HttpStatusCode.Created:
-                return new ObjectResult(result.User) { StatusCode = StatusCodes.Status201Created };
-            case HttpStatusCode.BadRequest:
-                return new BadRequestResult();
+                return StatusCode(StatusCodes.Status201Created, result.User);
             case HttpStatusCode.Conflict:
-                return new ConflictResult();
+                return StatusCode(StatusCodes.Status409Conflict, $"User with username <{request.Username}> already exists.");
             default:
                 return StatusCode(StatusCodes.Status500InternalServerError);
         }

@@ -52,8 +52,7 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Encountered exception while logging in user with UserName <{request.Username}>. Returning internal server error result.");
-            _logger.LogError($"{ex}");
+            _logger.LogError($"Encountered exception while logging in user with UserName <{request.Username}>. Returning internal server error result. Exception: {ex}");
             return new UserCRUDResult(HttpStatusCode.InternalServerError);
         }
     }
@@ -70,19 +69,15 @@ public class UserService : IUserService
                 return new UserCRUDResult(HttpStatusCode.Conflict, new UserDTO(user));
             }
 
-            if (!IsValidEmail(request.Email))
-            {
-                _logger.LogError($"Email <{request.Email}> is not valid. Returning bad request result");
-                return new UserCRUDResult(HttpStatusCode.BadRequest);
-            }
-
             var userEntity = new User
             {
                 UserId = Guid.NewGuid(),
                 UserName = request.Username,
                 Email = request.Email,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
                 PasswordHash = string.Empty,
-                AccountCreatedDate = DateTime.Now
+                AccountCreatedDate = DateTime.UtcNow
             };
 
             var passwordHash = _passwordHasher.HashPassword(userEntity, request.Password);
@@ -94,28 +89,8 @@ public class UserService : IUserService
         }
         catch(Exception ex)
         {
-            _logger.LogError($"Encountered exception while creating user with UserName <{request.Username}>. Returning internal server error result.");
-            _logger.LogError($"{ex}");
+            _logger.LogError($"Encountered exception while creating user with UserName <{request.Username}>. Returning internal server error result. Exception: {ex}");
             return new UserCRUDResult(HttpStatusCode.InternalServerError);
-        }
-    }
-
-    private bool IsValidEmail(string email)
-    {
-        var trimmedEmail = email.Trim();
-
-        if (trimmedEmail.EndsWith(".")) 
-        {
-            return false;
-        }
-        try 
-        {
-            var addr = new System.Net.Mail.MailAddress(email);
-            return addr.Address == trimmedEmail;
-        }
-        catch 
-        {
-            return false;
         }
     }
 }

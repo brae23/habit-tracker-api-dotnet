@@ -1,5 +1,4 @@
 using HabitTracker.Api.Infrastructure.Entities;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Task = HabitTracker.Api.Infrastructure.Entities.Task;
 
@@ -22,9 +21,8 @@ public class HabitTrackerDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var connString = _configuration.GetConnectionString("SqlConnection");
-        var conn = new SqliteConnection(connString);
-        optionsBuilder.UseSqlite(conn);
+        var connString = _configuration.GetConnectionString("PgsqlConnection");
+        optionsBuilder.UseNpgsql(connString);
         base.OnConfiguring(optionsBuilder);
     }
 

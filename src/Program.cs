@@ -1,7 +1,11 @@
+using FluentValidation;
 using HabitTracker.Api.Infrastructure;
 using HabitTracker.Api.Infrastructure.Entities;
+using HabitTracker.Api.Requests.Auth;
 using HabitTracker.Api.Services.Auth;
+using HabitTracker.Api.Validators;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +25,7 @@ builder.Services.AddSession(options =>
 });
 
 // Dependency Injection
+builder.Services.AddValidatorsFromAssemblyContaining<CreateUserValidator>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
@@ -31,6 +36,12 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<HabitTrackerDbContext>();
+        dbContext.Database.Migrate();
+    }
 }
 
 app.UseHttpsRedirection();
