@@ -1,7 +1,6 @@
 using FluentValidation;
 using HabitTracker.Api.Infrastructure;
 using HabitTracker.Api.Infrastructure.Entities;
-using HabitTracker.Api.Requests.Auth;
 using HabitTracker.Api.Services.Auth;
 using HabitTracker.Api.Validators;
 using Microsoft.AspNetCore.Identity;
@@ -49,6 +48,8 @@ app.UseHttpsRedirection();
 app.UseSession();
 
 app.UseExceptionHandler("/error");
+
+app.UseHealthChecks("/healthCheck");
 
 app.UseAuthorization();
 

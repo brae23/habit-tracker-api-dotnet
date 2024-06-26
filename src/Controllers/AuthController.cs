@@ -2,6 +2,7 @@ using System.Net;
 using FluentValidation;
 using HabitTracker.Api.Requests.Auth;
 using HabitTracker.Api.Services.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -54,6 +55,7 @@ public class AuthController : ControllerBase
 
     [HttpPost]
     [Route("logout")]
+    [Authorize]
     public IActionResult Logout([FromServices] ILogger<AuthController> logger)
     {
         try
@@ -71,6 +73,7 @@ public class AuthController : ControllerBase
 
     [HttpPost]
     [Route("createUser")]
+    [Authorize]
     public async Task<IActionResult> CreateUserAsync([FromBody] CreateUserRequest request, [FromServices] IValidator<CreateUserRequest> validator)
     {
         var validationResult = await validator.ValidateAsync(request);
