@@ -6,10 +6,10 @@ namespace HabitTracker.Api.Infrastructure.Entities;
 public class Task
 {
     [Key]
-    public Guid TaskId { get; set; }
+    public Guid Id { get; set; }
     public required string Name { get; set; }
     public bool Completed { get; set; }
-    public Guid CreatedByUserId { get; set; }
+    public required string CreatedByUserId { get; set; }
     [ForeignKey("CreatedByUserId")]
     public required User User { get; set; }
     public bool HasChildTasks { get; set; }

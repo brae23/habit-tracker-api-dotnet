@@ -6,7 +6,7 @@ namespace HabitTracker.Api.Infrastructure.Entities;
 public class List
 {
     [Key]
-    public Guid ListId { get; set; }
+    public Guid Id { get; set; }
     public required string Name { get; set;}
     public DateTime CreatedDate { get; set; }
     public string? Description { get; set; }

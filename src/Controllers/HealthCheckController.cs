@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HabitTracker.Api.Controllers;
 
-public class healthCheckController : ControllerBase
+public class HealthCheckController : ControllerBase
 {
     [Route("/healthCheck")]
     [ApiExplorerSettings(IgnoreApi = true)]
