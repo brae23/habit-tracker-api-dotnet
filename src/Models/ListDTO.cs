@@ -6,5 +6,5 @@ public class ListDTO
     public required string Name { get; set;}
     public DateTime CreatedDate { get; set; }
     public string? Description { get; set; }
-    public IEnumerable<Task> ListItems { get; set; } = null!;
+    public IEnumerable<TaskDTO> ListItems { get; set; } = null!;
 }

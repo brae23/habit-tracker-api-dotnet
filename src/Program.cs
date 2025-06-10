@@ -86,7 +86,6 @@ builder.Services
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.SameSite = SameSiteMode.Strict;
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
-        options.Cookie.Expiration = TimeSpan.FromDays(7);
         options.ReturnUrlParameter = "account";
         options.Events = new Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationEvents
         {
@@ -104,7 +103,6 @@ builder.Services
     });
 
 // Dependency Injection
-builder.Services.AddValidatorsFromAssemblyContaining<CreateUserValidator>();
 
 var app = builder.Build();
 
