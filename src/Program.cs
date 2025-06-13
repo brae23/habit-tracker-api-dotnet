@@ -32,9 +32,9 @@ builder.Services.AddIdentityCore<User>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric = true;
 })
-    .AddEntityFrameworkStores<HabitTrackerDbContext>()
-    .AddApiEndpoints()
-    .AddDefaultTokenProviders();
+.AddEntityFrameworkStores<HabitTrackerDbContext>()
+.AddApiEndpoints()
+.AddDefaultTokenProviders();
 
 builder.Services
     .AddAuthentication(options =>
@@ -46,7 +46,7 @@ builder.Services
     .AddCookie(IdentityConstants.BearerScheme, options =>
     {
         options.Cookie.Name = "HabitTracker.Application";
-        options.Cookie.HttpOnly = true;
+        options.Cookie.HttpOnly = false;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.SameSite = SameSiteMode.Strict;
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
@@ -85,7 +85,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapIdentityApi<User>();
+app.MapGroup("api/auth").MapIdentityApi<User>();
 
 app.UseExceptionHandler("/error");
 
