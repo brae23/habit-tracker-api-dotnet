@@ -1,7 +1,6 @@
 using HabitTracker.Api.Infrastructure;
-using HabitTracker.Api.Infrastructure.Entities;
-using HabitTracker.Api.Models;
-using HabitTracker.Api.Validators;
+using HabitTracker.Api.Models.DTOs;
+using HabitTracker.Api.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,84 +21,70 @@ public class TaskController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetTasks()
     {
-        var tasks = await _db.Tasks.Include(t => t.User).ToListAsync();
-        var result = tasks.Select(t => new TaskDTO
-        {
-            TaskId = t.Id,
-            Name = t.Name,
-            Completed = t.Completed,
-            CreatedByUserId = Guid.TryParse(t.CreatedByUserId, out var userId) ? userId : Guid.Empty,
-            HasChildTasks = t.HasChildTasks,
-            CreatedDate = t.CreatedDate,
-            ParentListId = t.ParentListId,
-            CompletedByUserId = t.CompletedByUserId,
-            Notes = t.Notes,
-            DueDate = t.DueDate
-        });
+        var tasks = await _db.Tasks.Include(t => t.CreatedByUser).Include(t => t.CompletedByUser).ToListAsync();
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return Unauthorized("User not found");
+
+        var result = tasks.Where(t => t.CreatedByUser.Id == userId).Select(TaskDTO.ToTaskDTO).ToList();
         return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTask(Guid id)
     {
-        var t = await _db.Tasks.Include(x => x.User).FirstOrDefaultAsync(x => x.Id == id);
+        var t = await _db.Tasks.Include(t => t.CreatedByUser).Include(t => t.CompletedByUser).FirstOrDefaultAsync(x => x.Id == id);
         if (t == null) return NotFound();
-        var dto = new TaskDTO
-        {
-            TaskId = t.Id,
-            Name = t.Name,
-            Completed = t.Completed,
-            CreatedByUserId = Guid.TryParse(t.CreatedByUserId, out var userId) ? userId : Guid.Empty,
-            HasChildTasks = t.HasChildTasks,
-            CreatedDate = t.CreatedDate,
-            ParentListId = t.ParentListId,
-            CompletedByUserId = t.CompletedByUserId,
-            Notes = t.Notes,
-            DueDate = t.DueDate
-        };
-        return Ok(dto);
+        return Ok(TaskDTO.ToTaskDTO(t));
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateTask([FromBody] TaskDTO dto)
+    public async Task<IActionResult> CreateTask([FromBody] CreateTaskRequest request)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
+
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return Unauthorized("User not found");
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) return Unauthorized("User not found");
+
         var task = new Infrastructure.Entities.Task
         {
-            Id = dto.TaskId != Guid.Empty ? dto.TaskId : Guid.NewGuid(),
-            Name = dto.Name,
-            Completed = dto.Completed,
-            CreatedByUserId = dto.CreatedByUserId.ToString(),
-            CreatedDate = dto.CreatedDate == default ? DateTime.UtcNow : dto.CreatedDate,
-            HasChildTasks = dto.HasChildTasks,
-            ParentListId = dto.ParentListId,
-            CompletedByUserId = dto.CompletedByUserId,
-            Notes = dto.Notes,
-            DueDate = dto.DueDate,
-            User = _db.Users.FirstOrDefault(u => u.Id == dto.CreatedByUserId.ToString()) ?? new User { Id = dto.CreatedByUserId.ToString() }
+            Id = Guid.NewGuid(),
+            Name = request.Name,
+            Completed = false,
+            CreatedByUser = user,
+            CreatedDate = DateTime.UtcNow,
+            HasChildTasks = false,
+            ParentListId = request.ListId,
+            CompletedByUser = null,
+            Notes = request.Notes,
+            DueDate = request.DueDate,
         };
         _db.Tasks.Add(task);
         await _db.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetTask), new { id = task.Id }, dto);
+        return CreatedAtAction(nameof(GetTask), new { id = task.Id }, TaskDTO.ToTaskDTO(task));
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateTask(Guid id, [FromBody] TaskDTO dto)
     {
-        var task = await _db.Tasks.Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id);
+        var task = await _db.Tasks.FirstOrDefaultAsync(t => t.Id == id);
         if (task == null) return NotFound();
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == dto.CreatedByUserId.ToString());
+        if (user == null) return BadRequest("User not found");
+
         task.Name = dto.Name;
         task.Completed = dto.Completed;
         task.HasChildTasks = dto.HasChildTasks;
         task.CreatedDate = dto.CreatedDate;
         task.ParentListId = dto.ParentListId;
-        task.CompletedByUserId = dto.CompletedByUserId;
+        task.CompletedByUser = user;
         task.Notes = dto.Notes;
         task.DueDate = dto.DueDate;
-        // Optionally update User if needed
         await _db.SaveChangesAsync();
         return Ok(dto);
     }
