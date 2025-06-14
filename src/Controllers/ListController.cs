@@ -25,15 +25,15 @@ public class ListController : ControllerBase
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (userId == null) return Unauthorized("User not found");
 
-        var lists = await _db.Lists.Include(t => t.CreatedByUser).Include(l => l.ListItems).ToListAsync();
-        var result = lists.Where(x => x.CreatedByUser.Id == userId).Select(ListDTO.ToListDTO);
+        var lists = await _db.Lists.Include(l => l.CreatedByUser).Include(t => t.Tasks).Include(l => l.Sublists).ThenInclude(sl => sl.Tasks).ToListAsync();
+        var result = lists.Where(x => x.CreatedByUser.Id == userId && x.ParentListId == null).Select(ListDTO.ToListDTO);
         return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetList(Guid id)
     {
-        var list = await _db.Lists.Include(t => t.CreatedByUser).Include(l => l.ListItems).FirstOrDefaultAsync(l => l.Id == id);
+        var list = await _db.Lists.Include(l => l.CreatedByUser).Include(t => t.Tasks).Include(l => l.Sublists).ThenInclude(sl => sl.Tasks).FirstOrDefaultAsync(l => l.Id == id);
         if (list == null) return NotFound();
         return Ok(ListDTO.ToListDTO(list));
     }
@@ -55,7 +55,8 @@ public class ListController : ControllerBase
             Name = request.Name,
             CreatedDate = DateTime.UtcNow,
             Description = request.Description,
-            CreatedByUser = user
+            CreatedByUser = user,
+            ParentListId = request.ParentListId,
         };
 
         _db.Lists.Add(list);
@@ -66,7 +67,7 @@ public class ListController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateList(Guid id, [FromBody] ListDTO dto)
     {
-        var list = await _db.Lists.Include(l => l.ListItems).FirstOrDefaultAsync(l => l.Id == id);
+        var list = await _db.Lists.Include(t => t.Tasks).Include(l => l.Sublists).ThenInclude(sl => sl.Tasks).FirstOrDefaultAsync(l => l.Id == id);
         if (list == null) return NotFound();
         list.Name = dto.Name;
         list.Description = dto.Description;
@@ -77,7 +78,7 @@ public class ListController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteList(Guid id)
     {
-        var list = await _db.Lists.Include(l => l.ListItems).FirstOrDefaultAsync(l => l.Id == id);
+        var list = await _db.Lists.Include(t => t.Tasks).Include(l => l.Sublists).ThenInclude(sl => sl.Tasks).FirstOrDefaultAsync(l => l.Id == id);
         if (list == null) return NotFound();
         _db.Lists.Remove(list);
         await _db.SaveChangesAsync();

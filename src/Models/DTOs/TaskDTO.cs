@@ -8,7 +8,7 @@ public class TaskDTO
     public Guid CreatedByUserId { get; set; }
     public bool HasChildTasks { get; set; }
     public DateTime CreatedDate { get; set; }
-    public Guid ParentListId { get; set; }
+    public Guid? ParentListId { get; set; } = null;
     public Guid? CompletedByUserId { get; set; }
     public string? Notes { get; set; }
     public DateTime? DueDate { get; set; }

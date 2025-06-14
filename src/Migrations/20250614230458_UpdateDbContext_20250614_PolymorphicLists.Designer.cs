@@ -3,6 +3,7 @@ using System;
 using HabitTracker.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HabitTracker.Api.Migrations
 {
     [DbContext(typeof(HabitTrackerDbContext))]
-    partial class HabitTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250614230458_UpdateDbContext_20250614_PolymorphicLists")]
+    partial class UpdateDbContext_20250614_PolymorphicLists
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,6 +41,9 @@ namespace HabitTracker.Api.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("ListId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -49,7 +55,7 @@ namespace HabitTracker.Api.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.HasIndex("ParentListId");
+                    b.HasIndex("ListId");
 
                     b.ToTable("Lists", "habit_tracker");
                 });
@@ -78,6 +84,9 @@ namespace HabitTracker.Api.Migrations
                     b.Property<bool>("HasChildTasks")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid?>("ListId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -94,7 +103,7 @@ namespace HabitTracker.Api.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.HasIndex("ParentListId");
+                    b.HasIndex("ListId");
 
                     b.ToTable("Tasks", "habit_tracker");
                 });
@@ -316,7 +325,7 @@ namespace HabitTracker.Api.Migrations
 
                     b.HasOne("HabitTracker.Api.Infrastructure.Entities.List", null)
                         .WithMany("Sublists")
-                        .HasForeignKey("ParentListId");
+                        .HasForeignKey("ListId");
 
                     b.Navigation("CreatedByUser");
                 });
@@ -333,7 +342,7 @@ namespace HabitTracker.Api.Migrations
 
                     b.HasOne("HabitTracker.Api.Infrastructure.Entities.List", null)
                         .WithMany("Tasks")
-                        .HasForeignKey("ParentListId");
+                        .HasForeignKey("ListId");
 
                     b.Navigation("CompletedByUser");
 

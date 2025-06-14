@@ -7,5 +7,6 @@ public class CreateListRequest
 {
     public required string Name { get; set; }
     public required ListType Type { get; set; }
-    public string? Description { get; set; }
+    public string? Description { get; set; } = null;
+    public Guid? ParentListId { get; set; } = null;
 }

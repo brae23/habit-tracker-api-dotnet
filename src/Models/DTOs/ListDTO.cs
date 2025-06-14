@@ -9,7 +9,10 @@ public class ListDTO
     public required DateTime CreatedDate { get; set; }
     public string? Description { get; set; }
     public required Guid CreatedByUserId { get; set; }
-    public IEnumerable<TaskDTO> ListItems { get; set; } = null!;
+    public IEnumerable<TaskDTO> Tasks { get; set; } = null!;
+    public IEnumerable<ListDTO> Sublists { get; set; } = null!;
+
+    public Guid? ParentListId { get; set; } = null;
 
     public static ListDTO ToListDTO(List list)
     {
@@ -20,7 +23,9 @@ public class ListDTO
             CreatedDate = list.CreatedDate,
             Description = list.Description,
             CreatedByUserId = Guid.TryParse(list.CreatedByUser.Id, out var createdByUserId) ? createdByUserId : Guid.Empty,
-            ListItems = list.ListItems?.Select(TaskDTO.ToTaskDTO).ToList() ?? new List<TaskDTO>()
+            Tasks = list.Tasks.Select(TaskDTO.ToTaskDTO),
+            Sublists = list.Sublists.Select(ToListDTO),
+            ParentListId = list.ParentListId
         };
     }
 }
