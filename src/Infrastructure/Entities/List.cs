@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using HabitTracker.Api.Models.Enums;
 
 namespace HabitTracker.Api.Infrastructure.Entities;
 
@@ -16,4 +17,5 @@ public class List
     [ForeignKey("ParentListId")]
     public virtual ICollection<List> Sublists { get; set; } = new List<List>();
     public Guid? ParentListId { get; set; }
+    public ListType Type { get; set; } = ListType.Todo;
 }

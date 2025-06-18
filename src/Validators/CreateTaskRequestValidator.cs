@@ -18,12 +18,12 @@ public class CreateTaskRequestValidator : AbstractValidator<CreateTaskRequest>
             .MaximumLength(100).WithMessage("Task name must be 100 characters or fewer.")
             .MustAsync(BeUniqueName).WithMessage("Task name must be unique in the list.");
 
-        RuleFor(x => x.ListId)
-            .NotEmpty().WithMessage("ListId is required.");
+        RuleFor(x => x.ParentListId)
+            .NotEmpty().WithMessage("ParentListId is required.");
     }
 
     private async Task<bool> BeUniqueName(CreateTaskRequest request, string name, CancellationToken cancellationToken)
     {
-        return !await _db.Tasks.AnyAsync(t => t.Name == name && t.ParentListId == request.ListId, cancellationToken);
+        return !await _db.Tasks.AnyAsync(t => t.Name == name && t.ParentListId == request.ParentListId, cancellationToken);
     }
 }

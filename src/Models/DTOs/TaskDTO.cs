@@ -2,7 +2,7 @@ namespace HabitTracker.Api.Models.DTOs;
 
 public class TaskDTO
 {
-    public Guid TaskId { get; set; }
+    public Guid Id { get; set; }
     public required string Name { get; set; }
     public bool Completed { get; set; }
     public Guid CreatedByUserId { get; set; }
@@ -17,7 +17,7 @@ public class TaskDTO
     {
         return new TaskDTO
         {
-            TaskId = task.Id,
+            Id = task.Id,
             Name = task.Name,
             Completed = task.Completed,
             CreatedByUserId = Guid.TryParse(task.CreatedByUser.Id, out var createdByUserId) ? createdByUserId : Guid.Empty,

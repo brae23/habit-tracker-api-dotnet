@@ -8,12 +8,12 @@ using Microsoft.EntityFrameworkCore;
 namespace HabitTracker.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/tasks")]
 [Authorize]
-public class TaskController : ControllerBase
+public class TasksController : ControllerBase
 {
     private readonly HabitTrackerDbContext _db;
-    public TaskController(HabitTrackerDbContext db)
+    public TasksController(HabitTrackerDbContext db)
     {
         _db = db;
     }
@@ -58,7 +58,7 @@ public class TaskController : ControllerBase
             CreatedByUser = user,
             CreatedDate = DateTime.UtcNow,
             HasChildTasks = false,
-            ParentListId = request.ListId,
+            ParentListId = request.ParentListId,
             CompletedByUser = null,
             Notes = request.Notes,
             DueDate = request.DueDate,

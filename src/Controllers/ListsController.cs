@@ -1,6 +1,7 @@
 using HabitTracker.Api.Infrastructure;
 using HabitTracker.Api.Infrastructure.Entities;
 using HabitTracker.Api.Models.DTOs;
+using HabitTracker.Api.Models.Enums;
 using HabitTracker.Api.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,12 +10,12 @@ using Microsoft.EntityFrameworkCore;
 namespace HabitTracker.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/lists")]
 [Authorize]
-public class ListController : ControllerBase
+public class ListsController : ControllerBase
 {
     private readonly HabitTrackerDbContext _db;
-    public ListController(HabitTrackerDbContext db)
+    public ListsController(HabitTrackerDbContext db)
     {
         _db = db;
     }
@@ -38,6 +39,22 @@ public class ListController : ControllerBase
         return Ok(ListDTO.ToListDTO(list));
     }
 
+    [HttpGet("daily")]
+    public async Task<IActionResult> GetDailyTaskList()
+    {
+        var list = await _db.Lists
+            .Include(l => l.CreatedByUser)
+            .Include(t => t.Tasks)
+            .Include(l => l.Sublists)
+            .ThenInclude(sl => sl.Tasks)
+            .Where(l => l.Type == ListType.Daily)
+            .OrderByDescending(l => l.CreatedDate)
+            .FirstOrDefaultAsync();
+
+        if (list == null) return NotFound();
+        return Ok(ListDTO.ToListDTO(list));
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateList([FromBody] CreateListRequest request)
     {
@@ -57,6 +74,7 @@ public class ListController : ControllerBase
             Description = request.Description,
             CreatedByUser = user,
             ParentListId = request.ParentListId,
+            Type = request.Type
         };
 
         _db.Lists.Add(list);
