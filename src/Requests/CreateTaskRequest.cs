@@ -7,6 +7,6 @@ public class CreateTaskRequest
     public string? Description { get; set; }
     public DateTime? DueDate { get; set; }
     public bool IsCompleted { get; set; } = false;
-    public int Priority { get; set; } = 0;
+    public TaskPriority Priority { get; set; } = TaskPriority.Low;
     public string? Notes { get; set; } = null;
 }

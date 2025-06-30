@@ -15,4 +15,5 @@ public class Task
     public string? Notes { get; set; }
     public DateTime? DueDate { get; set; }
     public Guid? ParentListId { get; set; }
+    public TaskPriority Priority { get; set; } = TaskPriority.Low;
 }

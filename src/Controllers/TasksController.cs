@@ -62,6 +62,7 @@ public class TasksController : ControllerBase
             CompletedByUser = null,
             Notes = request.Notes,
             DueDate = request.DueDate,
+            Priority = request.Priority
         };
         _db.Tasks.Add(task);
         await _db.SaveChangesAsync();
