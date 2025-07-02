@@ -24,7 +24,7 @@ public class ListDTO
             CreatedDate = list.CreatedDate,
             Description = list.Description,
             CreatedByUserId = Guid.TryParse(list.CreatedByUser.Id, out var createdByUserId) ? createdByUserId : Guid.Empty,
-            Tasks = list.Tasks.Select(TaskDTO.ToTaskDTO),
+            Tasks = list.Tasks.OrderByDescending(x => x.Priority).Select(TaskDTO.ToTaskDTO),
             Sublists = list.Sublists.Select(ToListDTO),
             ParentListId = list.ParentListId,
             Type = list.Type

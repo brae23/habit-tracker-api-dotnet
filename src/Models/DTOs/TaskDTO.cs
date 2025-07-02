@@ -12,6 +12,7 @@ public class TaskDTO
     public Guid? CompletedByUserId { get; set; }
     public string? Notes { get; set; }
     public DateTime? DueDate { get; set; }
+    public TaskPriority Priority { get; set; } = TaskPriority.Low;
 
     public static TaskDTO ToTaskDTO(Infrastructure.Entities.Task task)
     {
@@ -26,7 +27,8 @@ public class TaskDTO
             ParentListId = task.ParentListId,
             CompletedByUserId = Guid.TryParse(task.CompletedByUser?.Id, out var completedByUserId) ? completedByUserId : null,
             Notes = task.Notes,
-            DueDate = task.DueDate
+            DueDate = task.DueDate,
+            Priority = task.Priority
         };
     }
 }

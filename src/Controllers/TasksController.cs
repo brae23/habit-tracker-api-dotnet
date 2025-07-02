@@ -25,7 +25,7 @@ public class TasksController : ControllerBase
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (userId == null) return Unauthorized("User not found");
 
-        var result = tasks.Where(t => t.CreatedByUser.Id == userId).Select(TaskDTO.ToTaskDTO).ToList();
+        var result = tasks.Where(t => t.CreatedByUser.Id == userId).OrderByDescending(x => x.Priority).Select(TaskDTO.ToTaskDTO).ToList();
         return Ok(result);
     }
 
