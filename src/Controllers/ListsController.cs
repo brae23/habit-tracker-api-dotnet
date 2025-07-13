@@ -42,16 +42,38 @@ public class ListsController : ControllerBase
     [HttpGet("daily")]
     public async Task<IActionResult> GetDailyTaskList()
     {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (userId == null || user == null) return Unauthorized("User not found");
+
         var list = await _db.Lists
             .Include(l => l.CreatedByUser)
             .Include(t => t.Tasks)
             .Include(l => l.Sublists)
             .ThenInclude(sl => sl.Tasks)
-            .Where(l => l.Type == ListType.Daily)
+            .Where(l => l.Type == ListType.Daily && l.CreatedByUser.Id == userId)
             .OrderByDescending(l => l.CreatedDate)
             .FirstOrDefaultAsync();
 
-        if (list == null) return NotFound();
+        if (list == null)
+        {
+            var dateString = $"{DateTime.UtcNow:yyyy-MM-dd}";
+            var newDtl = new List
+            {
+                Id = Guid.NewGuid(),
+                Name = $"{dateString} Daily Tasks",
+                CreatedDate = DateTime.UtcNow,
+                Description = $"{dateString} Daily Tasks",
+                CreatedByUser = user,
+                ParentListId = null,
+                Type = ListType.Daily
+            };
+
+            _db.Lists.Add(newDtl);
+            await _db.SaveChangesAsync();
+            return Ok(ListDTO.ToListDTO(newDtl));
+        }
+
         return Ok(ListDTO.ToListDTO(list));
     }
 

@@ -15,6 +15,18 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<HabitTrackerDbContext>();
 builder.Services.AddDistributedMemoryCache();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("HabitTrackerApiPolicy",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:8100", "capacitor://localhost", "ionic://localhost")
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        });
+});
+
 // Auth
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityCore<User>(options =>
@@ -48,7 +60,7 @@ builder.Services
         options.Cookie.Name = "HabitTracker.Application";
         options.Cookie.HttpOnly = false;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.Cookie.SameSite = SameSiteMode.None;
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
         options.ReturnUrlParameter = "account";
         options.Events = new Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationEvents
@@ -91,19 +103,13 @@ app.UseExceptionHandler("/error");
 
 app.UseHealthChecks("/healthCheck");
 
+app.UseCors("HabitTrackerApiPolicy");
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.UseCors(x => {
-    string[] origins = ["http://localhost:8100"];
-    x.WithOrigins(origins);
-    x.AllowAnyMethod();
-    x.AllowCredentials();
-    x.AllowAnyHeader();
-    });
 
 
 app.Run();
